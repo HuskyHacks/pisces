@@ -12,22 +12,25 @@ import (
 type AnalyzeResult struct {
 	Location          string            `json:"location"`
 	RedirectLocations []Redirect        `json:"redirectLocations"`
-	InitialBodyHTML   string            `json:"initialBodyHTML"`
-	FinalBodyHTML     string            `json:"finialBodyHTML"`
+	Body              string            `json:"body"`
+	BodySize          int               `json:"bodySize"`
+	InitialBody       string            `json:"initialBody"`
+	InitialBodySize   int               `json:"initialBodySize"`
+	AssetsCount       int               `json:"assetsCount"`
 	Assets            map[string]*Asset `json:"assets"`
 }
 
 type Redirect struct {
-	StatusCode int64
-	Location   string
+	StatusCode int64  `json:"status_code"`
+	Location   string `json:"location"`
 }
 
 type Asset struct {
-	URL             string
-	ResourceType    string
-	RequestHeaders  map[string]any
-	ResponseHeaders map[string]any
-	Body            string
+	URL             string         `json:"url"`
+	ResourceType    string         `json:"resourceType"`
+	RequestHeaders  map[string]any `json:"requestHeaders"`
+	ResponseHeaders map[string]any `json:"responseHeaders"`
+	Body            string         `json:"body"`
 }
 
 func performAnalyzeTask(ctx context.Context, task *Task, logger *zerolog.Logger) (AnalyzeResult, error) {
@@ -85,7 +88,7 @@ func performAnalyzeTask(ctx context.Context, task *Task, logger *zerolog.Logger)
 						return
 					}
 
-					result.InitialBodyHTML = string(body)
+					result.InitialBody = string(body)
 				})
 
 				return
@@ -108,11 +111,17 @@ func performAnalyzeTask(ctx context.Context, task *Task, logger *zerolog.Logger)
 		emulation.SetUserAgentOverride(task.userAgent),
 		chromedp.Navigate(task.url),
 		chromedp.Location(&result.Location),
+		chromedp.OuterHTML("html", &result.Body),
 	}
 
 	if err := chromedp.Run(ctx, initialSteps...); err != nil {
 		return AnalyzeResult{}, err
 	}
+
+	// Set sizes and counts
+	result.AssetsCount = len(result.Assets)
+	result.InitialBodySize = len(result.InitialBody)
+	result.BodySize = len(result.Body)
 
 	return result, nil
 }

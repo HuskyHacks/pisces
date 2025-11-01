@@ -15,7 +15,9 @@ require (
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gobwas/ws v1.4.0 // indirect
+	github.com/goccy/go-json v0.9.4 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/multiprocessio/go-json v0.0.0-20220308002443-61d497dd7b9e // indirect
 	golang.org/x/sys v0.34.0 // indirect
 )

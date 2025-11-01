@@ -8,6 +8,7 @@ import (
 
 	"github.com/mjc-gh/pisces/engine"
 	"github.com/mjc-gh/pisces/internal/browser"
+	jsonutil "github.com/multiprocessio/go-json"
 	"github.com/urfave/cli/v3"
 )
 
@@ -69,7 +70,9 @@ func main() {
 
 					defer out.Close()
 
-					// TODO write an arary for results as JSON
+					encoder := jsonutil.NewStreamEncoder(out, true)
+					defer encoder.Close()
+
 					for r := range e.Results() {
 						if r.Error != nil {
 							logger.Warn().Msgf("result error: %v", r.Error)
@@ -78,13 +81,7 @@ func main() {
 
 						logger.Info().Msgf("result for %s (duration %s)", r.URL, r.Elapsed.String())
 
-						json, err := r.JSON()
-						if err != nil {
-							logger.Warn().Msgf("result json error: %v", err)
-							continue
-						}
-
-						_, err = out.Write(json)
+						err := encoder.EncodeRow(r)
 						if err != nil {
 							logger.Warn().Msgf("result json write error: %v", err)
 						}

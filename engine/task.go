@@ -45,9 +45,19 @@ func (t *Task) SetUserAgent(deviceType, userAgentAlias string) {
 type Result struct {
 	Action  string        `json:"action"`
 	Elapsed time.Duration `json:"elapsed"`
-	Error   error         `json:"error"`
+	Error   error         `json:"error,omitempty"`
 	URL     string        `json:"url"`
 	Result  Payload       `json:"result"`
+}
+
+func newErrorResult(task *Task, err error) Result {
+	return Result{
+		task.action,
+		time.Since(task.received),
+		err,
+		task.url,
+		nil,
+	}
 }
 
 func (r *Result) JSON() ([]byte, error) {
@@ -74,13 +84,7 @@ func performTask(ctx context.Context, task *Task, logger *zerolog.Logger) Result
 		analysis, err := performAnalyzeTask(ctx, task, logger)
 		if err != nil {
 			// Task failed
-			return Result{
-				task.action,
-				time.Since(task.received),
-				err,
-				task.url,
-				nil,
-			}
+			return newErrorResult(task, err)
 		}
 
 		result.Elapsed = time.Since(task.received)
@@ -88,13 +92,7 @@ func performTask(ctx context.Context, task *Task, logger *zerolog.Logger) Result
 
 	default:
 		// Unknown task -- shouldn't happen in practice
-		return Result{
-			task.action,
-			time.Since(task.received),
-			fmt.Errorf("unknown action: %s", task.action),
-			task.url,
-			nil,
-		}
+		return newErrorResult(task, fmt.Errorf("unknown action: %s", task.action))
 	}
 
 	return result
