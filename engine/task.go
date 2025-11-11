@@ -83,7 +83,6 @@ func performTask(ctx context.Context, task *Task, logger *zerolog.Logger) Result
 	case "analyze":
 		payload, err := performAnalyzeTask(ctx, task, logger)
 		if err != nil {
-			// Task failed
 			return newErrorResult(task, err)
 		}
 
@@ -92,7 +91,14 @@ func performTask(ctx context.Context, task *Task, logger *zerolog.Logger) Result
 	case "collect":
 		payload, err := performCollectTask(ctx, task, logger)
 		if err != nil {
-			// Task failed
+			return newErrorResult(task, err)
+		}
+
+		result.Result = &payload
+
+	case "screenshot":
+		payload, err := performScreenshotTask(ctx, task, logger)
+		if err != nil {
 			return newErrorResult(task, err)
 		}
 

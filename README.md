@@ -4,47 +4,39 @@
 
 A tool for analyzing phishing attack sites
 
-# Task Results
+## Development
 
-### Field Descriptions
+You can build the CLI tool with the following:
 
-| Field | Type | JSON Key | Description |
-|-------|------|----------|-------------|
-| Action | `string` | action | The action performed |
-| Elapsed | `time.Duration` | elapsed | Duration in nanoseconds |
-| Error | `error` | error | Error message (omitted if nil) |
-| URL | `string` | url | The URL accessed |
-| Result | `Payload` | result | The task result |
+```
+make build.cli
+./build/pisces -h
+```
 
-### Notes
-
-- The `Elapsed` field is serialized as an integer representing nanoseconds
-- The `Error` field is omitted from JSON when nil due to the `omitempty` tag
-- The `Result` field structure depends on the `Payload` type definition
-
-## Analyze Tasks
+## Usage
 
 ```
 NAME:
-   pisces analyze - Analyze one or more URLs
+   pisces - A tool for analyzing phishing sites
 
 USAGE:
-   pisces analyze [options] [url ...]
+   pisces [global options] [command [command options]]
 
-OPTIONS:
-   --debug, -d                 (default: false)
-   --remote, -r                (default: false)
-   --concurrency int, -c int   (default: 0)
-   --port int                  (default: 9222)
-   --device-type string        (default: "desktop")
-   --device-size string        (default: "large")
-   --host string               (default: "127.0.0.1")
-   --output string, -o string  (default: "pisces.json")
-   --user-agent string         (default: "chrome")
-   --help, -h                  show help
+VERSION:
+   0.0.0
+
+COMMANDS:
+   analyze     Analyze and interact one or more URLs for phishing
+   collect     Collect HTML and assets for one or more URLs
+   screenshot  Screenshot one or more URLs
+   help, h     Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --help, -h     show help
+   --version, -v  print the version
 ```
 
-### Analyze Result Out
+### Result Output
 
 ```json
 {
@@ -68,8 +60,8 @@ OPTIONS:
     "initialBody": "<html><body>Initial content</body></html>",
     "initialBodySize": 41,
     "assetsCount": 2,
-    "assets": {
-      "https://example.com/style.css": {
+    "assets": [
+      {
         "url": "https://example.com/style.css",
         "resource_type": "stylesheet",
         "request_headers": {
@@ -80,7 +72,7 @@ OPTIONS:
         },
         "body": "body { margin: 0; }"
       },
-      "https://example.com/script.js": {
+      {
         "url": "https://example.com/script.js",
         "resource_type": "script",
         "request_headers": {
@@ -91,7 +83,7 @@ OPTIONS:
         },
         "body": "console.log('hello');"
       }
-    }
+    ]
   }
 }
 ```

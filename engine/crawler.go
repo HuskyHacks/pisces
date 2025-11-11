@@ -1,4 +1,4 @@
-package browser
+package engine
 
 import (
 	"context"
@@ -17,11 +17,13 @@ type Crawler struct {
 }
 
 type Visit struct {
-	Location          string            `json:"location"`
-	RedirectLocations []Redirect        `json:"redirectLocations"`
-	Body              string            `json:"body"`
-	InitialBody       string            `json:"initialBody"`
-	Assets            map[string]*Asset `json:"assets"`
+	Location          string     `json:"location"`
+	RedirectLocations []Redirect `json:"redirectLocations"`
+	Body              string     `json:"body"`
+	InitialBody       string     `json:"initialBody"`
+	Assets            []*Asset   `json:"assets"`
+
+	assetsMap map[string]*Asset
 }
 
 type Redirect struct {
@@ -47,7 +49,7 @@ func (c *Crawler) Visit(ctx context.Context, url string, logger *zerolog.Logger)
 	var mainReqID network.RequestID
 
 	visit := Visit{}
-	visit.Assets = make(map[string]*Asset)
+	visit.assetsMap = make(map[string]*Asset)
 
 	chromedp.ListenTarget(ctx, func(ev any) {
 		switch ev := ev.(type) {
@@ -76,7 +78,7 @@ func (c *Crawler) Visit(ctx context.Context, url string, logger *zerolog.Logger)
 				}
 			} else {
 				// Track request as an asset
-				visit.Assets[string(ev.RequestID)] = &Asset{
+				visit.assetsMap[string(ev.RequestID)] = &Asset{
 					URL:            ev.Request.URL,
 					ResourceType:   string(ev.Type),
 					RequestHeaders: ev.Request.Headers,
@@ -84,7 +86,7 @@ func (c *Crawler) Visit(ctx context.Context, url string, logger *zerolog.Logger)
 			}
 
 		case *network.EventResponseReceived:
-			if asset, ok := visit.Assets[string(ev.RequestID)]; ok {
+			if asset, ok := visit.assetsMap[string(ev.RequestID)]; ok {
 				asset.ResponseHeaders = ev.Response.Headers
 			}
 		case *network.EventLoadingFinished:
@@ -99,7 +101,7 @@ func (c *Crawler) Visit(ctx context.Context, url string, logger *zerolog.Logger)
 				})
 
 				return
-			} else if asset, ok := visit.Assets[string(ev.RequestID)]; ok {
+			} else if asset, ok := visit.assetsMap[string(ev.RequestID)]; ok {
 				go getResponseBody(ctx, ev.RequestID, func(body []byte, err error) {
 					if err != nil {
 						logger.Warn().Msgf("crawler getResponseBody error: %s", err)
@@ -123,6 +125,11 @@ func (c *Crawler) Visit(ctx context.Context, url string, logger *zerolog.Logger)
 
 	if err := chromedp.Run(ctx, initialSteps...); err != nil {
 		return err
+	}
+
+	// Flatten the assets map to slice of Assets
+	for _, asset := range visit.assetsMap {
+		visit.Assets = append(visit.Assets, asset)
 	}
 
 	// Add visit to slice

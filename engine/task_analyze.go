@@ -2,144 +2,120 @@ package engine
 
 import (
 	"context"
+	"errors"
 
-	"github.com/chromedp/cdproto/emulation"
-	"github.com/chromedp/cdproto/network"
+	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/chromedp"
 	"github.com/rs/zerolog"
 )
 
+type Input struct {
+	Name  string
+	Type  string
+	Value string
+}
+
+type Form struct {
+	Action string `json:"action"`
+	Method string `json:"method"`
+	Class  string `json:"class"`
+	ID     string `json:"id"`
+	Inputs []Input
+}
+
 type AnalyzeResult struct {
-	Location          string            `json:"location"`
-	RedirectLocations []Redirect        `json:"redirectLocations"`
-	Body              string            `json:"body"`
-	BodySize          int               `json:"bodySize"`
-	InitialBody       string            `json:"initialBody"`
-	InitialBodySize   int               `json:"initialBodySize"`
-	AssetsCount       int               `json:"assetsCount"`
-	Assets            map[string]*Asset `json:"assets"`
-}
-
-type Redirect struct {
-	StatusCode int64  `json:"status_code"`
-	Location   string `json:"location"`
-}
-
-type Asset struct {
-	URL             string         `json:"url"`
-	ResourceType    string         `json:"resourceType"`
-	RequestHeaders  map[string]any `json:"requestHeaders"`
-	ResponseHeaders map[string]any `json:"responseHeaders"`
-	Body            string         `json:"body"`
+	Forms []Form `json:"forms"`
+	*Visit
 }
 
 func performAnalyzeTask(ctx context.Context, task *Task, logger *zerolog.Logger) (AnalyzeResult, error) {
-	var mainReqID network.RequestID
-
 	ctx, cancel := chromedp.NewContext(ctx)
 	defer cancel()
 
-	result := AnalyzeResult{}
-	result.Assets = make(map[string]*Asset)
-
-	chromedp.ListenTarget(ctx, func(ev any) {
-		switch ev := ev.(type) {
-		case *network.EventRequestWillBeSent:
-			if ev.Initiator == nil {
-				logger.Warn().Msg("analyze EventRequestWillBeSent with nil initiator")
-				return
-			}
-
-			// "document" resource request types
-			if ev.Type == network.ResourceTypeDocument && ev.Initiator.Type == "other" {
-				if mainReqID == "" {
-					mainReqID = ev.RequestID
-				}
-
-				// Capture redirects from navigation
-				if ev.RedirectResponse != nil {
-					if val, ok := ev.RedirectResponse.Headers["Location"]; ok {
-						status := ev.RedirectResponse.Status
-
-						switch location := val.(type) {
-						case string:
-							result.RedirectLocations = append(result.RedirectLocations, Redirect{status, location})
-						}
-					}
-				}
-			} else {
-				// Track request as an asset
-				result.Assets[string(ev.RequestID)] = &Asset{
-					URL:            ev.Request.URL,
-					ResourceType:   string(ev.Type),
-					RequestHeaders: ev.Request.Headers,
-				}
-			}
-
-		case *network.EventResponseReceived:
-			if asset, ok := result.Assets[string(ev.RequestID)]; ok {
-				asset.ResponseHeaders = ev.Response.Headers
-			}
-		case *network.EventLoadingFinished:
-			if ev.RequestID == mainReqID {
-				go getResponseBody(ctx, ev.RequestID, func(body []byte, err error) {
-					if err != nil {
-						logger.Warn().Msgf("analyze getResponseBody main request erro: %s", err)
-						return
-					}
-
-					result.InitialBody = string(body)
-				})
-
-				return
-			} else if asset, ok := result.Assets[string(ev.RequestID)]; ok {
-				go getResponseBody(ctx, ev.RequestID, func(body []byte, err error) {
-					if err != nil {
-						logger.Warn().Msgf("analyze getResponseBody main request erro: %s", err)
-						return
-					}
-
-					asset.Body = string(body)
-				})
-			}
-		}
-	})
-
-	initialSteps := []chromedp.Action{
-		network.Enable(),
-		chromedp.EmulateViewport(int64(task.winWidth), int64(task.winHeight)),
-		emulation.SetUserAgentOverride(task.userAgent),
-		chromedp.Navigate(task.url),
-		chromedp.Location(&result.Location),
-		chromedp.OuterHTML("html", &result.Body),
-	}
-
-	if err := chromedp.Run(ctx, initialSteps...); err != nil {
+	crawler := NewCrawler(task.userAgent, int64(task.winWidth), int64(task.winHeight))
+	err := crawler.Visit(ctx, task.url, logger)
+	if err != nil {
 		return AnalyzeResult{}, err
 	}
 
-	// Set sizes and counts
-	result.AssetsCount = len(result.Assets)
-	result.InitialBodySize = len(result.InitialBody)
-	result.BodySize = len(result.Body)
+	visit := crawler.LastVisit()
+	if visit == nil {
+		return AnalyzeResult{}, errors.New("no visit from crawler")
+	}
+
+	result := AnalyzeResult{}
+
+	if err = runFormAnalysis(ctx, &result); err != nil {
+		logger.Warn().Msgf("analyze task form analysis error: %-v", err)
+	}
+
+	// TODO assign Visit
 
 	return result, nil
 }
 
-func getResponseBody(ctx context.Context, reqID network.RequestID, callback func([]byte, error)) {
-	var body []byte
+func runFormAnalysis(ctx context.Context, result *AnalyzeResult) error {
+	return chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
+		var formNodes []*cdp.Node
 
-	// ActionFunc to bind body and handle error
-	fn := func(ctx context.Context) (err error) {
-		body, err = network.GetResponseBody(reqID).Do(ctx)
+		if err := chromedp.Nodes("form", &formNodes, chromedp.ByQueryAll).Do(ctx); err != nil {
+			return err
+		}
+
+		formAttrs, err := attributesFromNodes(ctx, formNodes, []string{"action", "method", "class", "id"})
+		if err != nil {
+			return err
+		}
+
+		for _, attributes := range formAttrs {
+			form := Form{
+				Action: attributes[0],
+				Method: attributes[1],
+				Class:  attributes[2],
+				ID:     attributes[3],
+			}
+
+			result.Forms = append(result.Forms, form)
+		}
+
+		return nil
+	}))
+}
+
+/*
+	var nodes []*chromedp.Node
+	if err := chromedp.Nodes("a[href]", &nodes).Do(ctx); err != nil {
 		return err
 	}
+	for _, node := range nodes {
+		if href, ok := node.Attributes["href"]; ok {
+			hrefs = append(hrefs, href)
+		}
+	}
+	return nil
+*/
 
-	err := chromedp.Run(ctx, chromedp.ActionFunc(fn))
-	if err != nil {
-		callback(body, err)
-		return
+func attributesFromNodes(ctx context.Context, nodes []*cdp.Node, attributes []string) ([][]string, error) {
+	values := make([][]string, len(nodes))
+
+	for i, node := range nodes {
+		values[i] = make([]string, len(attributes))
+
+		for j, attribute := range attributes {
+			err := chromedp.Run(ctx,
+				chromedp.JavascriptAttribute(
+					node.FullXPath(), attribute, &values[i][j], chromedp.BySearch,
+				),
+			)
+
+			// Fallback to Attribute method on the Node type
+			if err != nil {
+				if val, ok := node.Attribute(attribute); ok {
+					values[i][j] = val
+				}
+			}
+		}
 	}
 
-	callback(body, nil)
+	return values, nil
 }
