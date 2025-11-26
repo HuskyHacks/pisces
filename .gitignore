@@ -1,3 +1,6 @@
 build/*
 
 pisces.json
+pisces.ndjson
+
+TODO.md

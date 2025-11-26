@@ -2,18 +2,21 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 
+	"github.com/mjc-gh/pisces"
 	"github.com/mjc-gh/pisces/engine"
 	"github.com/mjc-gh/pisces/internal/browser"
-	jsonutil "github.com/multiprocessio/go-json"
 	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v3"
 )
 
-type taskCallbackFn = func(*cli.Command, *engine.Engine, *zerolog.Logger) error
+var logger *zerolog.Logger
+
+type taskCallbackFn = func(*cli.Command, *engine.Engine) error
 
 func main() {
 	baseArgs := []cli.Argument{
@@ -32,7 +35,7 @@ func main() {
 	}
 
 	withOutputFlags := append([]cli.Flag{
-		&cli.StringFlag{Name: "output", Value: "pisces.json", Aliases: []string{"o"}},
+		&cli.StringFlag{Name: "output", Value: "pisces.ndjson", Aliases: []string{"o"}},
 	}, baseFlags...)
 
 	cmd := &cli.Command{
@@ -77,7 +80,7 @@ func main() {
 }
 
 func runTask(ctx context.Context, cmd *cli.Command, name string, callback taskCallbackFn) error {
-	logger := engine.NewLogger(cmd.Bool("debug"))
+	logger = pisces.SetupLogger(cmd.Bool("debug"))
 
 	deviceSize := cmd.StringArg("device-size")
 	deviceType := cmd.StringArg("device-type")
@@ -85,7 +88,7 @@ func runTask(ctx context.Context, cmd *cli.Command, name string, callback taskCa
 	port := cmd.Int("port")
 	urls := cmd.StringArgs("url")
 
-	opts := []engine.Option{engine.WithLogger(logger)}
+	opts := []engine.Option{engine.WithLogger(pisces.Logger())}
 
 	if cmd.Bool("remote") && host != "" && port != 0 {
 		opts = append(opts, engine.WithRemoteAllocator(host, port))
@@ -106,17 +109,15 @@ func runTask(ctx context.Context, cmd *cli.Command, name string, callback taskCa
 
 	// TODO handle interrupt signal and wait for shutdown
 
-	return callback(cmd, e, logger)
+	return callback(cmd, e)
 }
 
-func outputResultJson(cmd *cli.Command, e *engine.Engine, logger *zerolog.Logger) error {
+func outputResultJson(cmd *cli.Command, e *engine.Engine) error {
 	output := cmd.String("output")
 	out, err := os.Create(output)
 	if err != nil {
 		panic(err)
 	}
-
-	encoder := jsonutil.NewStreamEncoder(out, true)
 
 	for r := range e.Results() {
 		if r.Error != nil {
@@ -126,16 +127,20 @@ func outputResultJson(cmd *cli.Command, e *engine.Engine, logger *zerolog.Logger
 
 		logger.Info().Msgf("result for %s (duration %s)", r.URL, r.Elapsed.String())
 
-		err := encoder.EncodeRow(r)
+		line, err := json.Marshal(r.Result)
 		if err != nil {
-			logger.Warn().Msgf("result json write error: %v", err)
+			logger.Warn().Msgf("result json marshal error: %v", r.Error)
 		}
 
-		logger.Info().Msgf("wrote to file %s", output)
-	}
+		if _, err = out.Write(line); err != nil {
+			logger.Warn().Msgf("result json write error: %v", r.Error)
+		}
 
-	if err = encoder.Close(); err != nil {
-		logger.Warn().Msgf("encoder close error: %v", err)
+		if _, err = out.Write([]byte("\n")); err != nil {
+			logger.Warn().Msgf("result json write error: %v", r.Error)
+		}
+
+		logger.Debug().Msgf("wrote to file %s", output)
 	}
 
 	if err = out.Close(); err != nil {

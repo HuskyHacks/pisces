@@ -17,6 +17,7 @@ type Crawler struct {
 }
 
 type Visit struct {
+	RequestedUrl      string     `json:"requested_url"`
 	Location          string     `json:"location"`
 	RedirectLocations []Redirect `json:"redirectLocations"`
 	Body              string     `json:"body"`
@@ -48,7 +49,7 @@ func NewCrawler(userAgent string, winWidth, winHeight int64) Crawler {
 func (c *Crawler) Visit(ctx context.Context, url string, logger *zerolog.Logger) error {
 	var mainReqID network.RequestID
 
-	visit := Visit{}
+	visit := Visit{RequestedUrl: url}
 	visit.assetsMap = make(map[string]*Asset)
 
 	chromedp.ListenTarget(ctx, func(ev any) {

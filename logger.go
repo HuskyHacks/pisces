@@ -1,4 +1,4 @@
-package engine
+package pisces
 
 import (
 	"os"
@@ -7,14 +7,17 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func NewLogger(debug bool) *zerolog.Logger {
+var logger *zerolog.Logger
+
+func SetupLogger(debug bool) *zerolog.Logger {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
-	logger := zerolog.New(os.Stdout).With().Timestamp().
+	l := zerolog.New(os.Stdout).With().Timestamp().
 		Str("source", "go").
+		Str("service", "pisces").
 		Logger().
 		Sample(
 			zerolog.LevelSampler{
@@ -31,5 +34,10 @@ func NewLogger(debug bool) *zerolog.Logger {
 			},
 		)
 
-	return &logger
+	logger = &l
+	return logger
+}
+
+func Logger() *zerolog.Logger {
+	return logger
 }

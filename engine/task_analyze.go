@@ -10,21 +10,28 @@ import (
 )
 
 type Input struct {
-	Name  string
-	Type  string
-	Value string
+	Name  string `json:"name"`
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }
 
 type Form struct {
-	Action string `json:"action"`
-	Method string `json:"method"`
-	Class  string `json:"class"`
-	ID     string `json:"id"`
-	Inputs []Input
+	Action string  `json:"action"`
+	Method string  `json:"method"`
+	Class  string  `json:"class"`
+	ID     string  `json:"id"`
+	Inputs []Input `json:"fields"`
+}
+
+type Link struct {
+	Href  string `json:"href"`
+	Text  string `json:"text,omitempty"`
+	Class string `json:"class,omitempty"`
 }
 
 type AnalyzeResult struct {
 	Forms []Form `json:"forms"`
+	Links []Link `json:"links"`
 	*Visit
 }
 
@@ -43,13 +50,15 @@ func performAnalyzeTask(ctx context.Context, task *Task, logger *zerolog.Logger)
 		return AnalyzeResult{}, errors.New("no visit from crawler")
 	}
 
-	result := AnalyzeResult{}
+	result := AnalyzeResult{Visit: visit}
 
 	if err = runFormAnalysis(ctx, &result); err != nil {
-		logger.Warn().Msgf("analyze task form analysis error: %-v", err)
+		logger.Warn().Msgf("analyze task form analysis error: %v", err)
 	}
 
-	// TODO assign Visit
+	if err = runLinkAnalysis(ctx, &result); err != nil {
+		logger.Warn().Msgf("analyze task href analysis error: %v", err)
+	}
 
 	return result, nil
 }
@@ -62,17 +71,37 @@ func runFormAnalysis(ctx context.Context, result *AnalyzeResult) error {
 			return err
 		}
 
-		formAttrs, err := attributesFromNodes(ctx, formNodes, []string{"action", "method", "class", "id"})
+		result.Forms = make([]Form, 0, len(formNodes))
+
+		formNodeAttrs, err := attributesFromNodes(ctx, formNodes, []string{"action", "method", "class", "id"})
 		if err != nil {
 			return err
 		}
 
-		for _, attributes := range formAttrs {
+		for idx, formNode := range formNodes {
+			var inputNodes []*cdp.Node
+			if err := chromedp.Nodes("input, textarea, select", &inputNodes, chromedp.FromNode(formNode)).Do(ctx); err != nil {
+				return err
+			}
+
+			formAttrs := formNodeAttrs[idx]
 			form := Form{
-				Action: attributes[0],
-				Method: attributes[1],
-				Class:  attributes[2],
-				ID:     attributes[3],
+				Action: formAttrs[0],
+				Method: formAttrs[1],
+				Class:  formAttrs[2],
+				ID:     formAttrs[3],
+				Inputs: make([]Input, len(inputNodes)),
+			}
+
+			inputNodeAttrs, err := attributesFromNodes(ctx, inputNodes, []string{"name", "type", "value"})
+			if err != nil {
+				return err
+			}
+
+			for jdx, inputAttrs := range inputNodeAttrs {
+				form.Inputs[jdx].Name = inputAttrs[0]
+				form.Inputs[jdx].Type = inputAttrs[1]
+				form.Inputs[jdx].Value = inputAttrs[2]
 			}
 
 			result.Forms = append(result.Forms, form)
@@ -82,18 +111,39 @@ func runFormAnalysis(ctx context.Context, result *AnalyzeResult) error {
 	}))
 }
 
-/*
-	var nodes []*chromedp.Node
-	if err := chromedp.Nodes("a[href]", &nodes).Do(ctx); err != nil {
-		return err
-	}
-	for _, node := range nodes {
-		if href, ok := node.Attributes["href"]; ok {
-			hrefs = append(hrefs, href)
+func runLinkAnalysis(ctx context.Context, result *AnalyzeResult) error {
+	return chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
+		var anchorNodes []*cdp.Node
+
+		if err := chromedp.Nodes("a[href]", &anchorNodes, chromedp.ByQueryAll).Do(ctx); err != nil {
+			return err
 		}
-	}
-	return nil
-*/
+
+		result.Links = make([]Link, 0, len(anchorNodes))
+
+		anchorNodeAttrs, err := attributesFromNodes(ctx, anchorNodes, []string{"href", "class"})
+		if err != nil {
+			return err
+		}
+
+		for idx, anchorNode := range anchorNodes {
+			anchorAttrs := anchorNodeAttrs[idx]
+			if anchorAttrs[0] == "" {
+				continue
+			}
+
+			link := Link{Href: anchorAttrs[0], Class: anchorAttrs[1]}
+
+			if err := chromedp.Run(ctx, chromedp.TextContent(anchorNode.FullXPath(), &link.Text, chromedp.BySearch)); err != nil {
+				return err
+			}
+
+			result.Links = append(result.Links, link)
+		}
+
+		return nil
+	}))
+}
 
 func attributesFromNodes(ctx context.Context, nodes []*cdp.Node, attributes []string) ([][]string, error) {
 	values := make([][]string, len(nodes))
