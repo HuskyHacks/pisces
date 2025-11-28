@@ -19,9 +19,9 @@ type Crawler struct {
 type Visit struct {
 	RequestedUrl      string     `json:"requested_url"`
 	Location          string     `json:"location"`
-	RedirectLocations []Redirect `json:"redirectLocations"`
+	RedirectLocations []Redirect `json:"redirect_locations"`
 	Body              string     `json:"body"`
-	InitialBody       string     `json:"initialBody"`
+	InitialBody       string     `json:"initial_body"`
 	Assets            []*Asset   `json:"assets"`
 
 	assetsMap map[string]*Asset
@@ -34,9 +34,9 @@ type Redirect struct {
 
 type Asset struct {
 	URL             string         `json:"url"`
-	ResourceType    string         `json:"resourceType"`
-	RequestHeaders  map[string]any `json:"requestHeaders"`
-	ResponseHeaders map[string]any `json:"responseHeaders"`
+	ResourceType    string         `json:"resource_type"`
+	RequestHeaders  map[string]any `json:"request_headers"`
+	ResponseHeaders map[string]any `json:"response_headers"`
 	Body            string         `json:"body"`
 }
 

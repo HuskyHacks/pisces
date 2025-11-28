@@ -36,6 +36,23 @@ GLOBAL OPTIONS:
    --version, -v  print the version
 ```
 
+### Flags
+
+All commands accept the following flags:
+
+```
+   --debug, -d                 (default: false)
+   --remote, -r                (default: false)
+   --concurrency int, -c int   (default: 0)
+   --port int                  (default: 9222)
+   --device-type string        (default: "desktop")
+   --device-size string        (default: "large")
+   --host string               (default: "127.0.0.1")
+   --user-agent string         (default: "chrome")
+```
+
+See command specific help for output flags.
+
 ### Result Output
 
 ```json
@@ -134,6 +151,13 @@ GLOBAL OPTIONS:
       "class": "pure-button puree-button-secondary challenge-button"
     }
   ],
+  "head": {
+    "title": "Login - Sign in to Yahoo",
+    "description": "Sign in to access the best in class Yahoo Mail, breaking local, ...",
+    "favicon_url": "https://s.yimg.com/wm/mbr/images/yahoo-yep-favicon-v1.ico",
+    "shortcut_icon_url": "https://s.yimg.com/wm/mbr/images/yahoo-yep-favicon-v1.ico",
+    "viewport": "initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit..."
+  },
   "requested_url": "https://login.yahoo.com/",
   "location": "https://login.yahoo.com/",
   "redirectLocations": null,

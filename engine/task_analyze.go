@@ -29,9 +29,18 @@ type Link struct {
 	Class string `json:"class,omitempty"`
 }
 
+type Head struct {
+	Title           string `json:"title"`
+	Description     string `json:"description"`
+	FaviconUrl      string `json:"favicon_url"`
+	ShortcutIconUrl string `json:"shortcut_icon_url"`
+	Viewport        string `json:"viewport"`
+}
+
 type AnalyzeResult struct {
 	Forms []Form `json:"forms"`
 	Links []Link `json:"links"`
+	Head  Head   `json:"head"`
 	*Visit
 }
 
@@ -51,6 +60,7 @@ func performAnalyzeTask(ctx context.Context, task *Task, logger *zerolog.Logger)
 	}
 
 	result := AnalyzeResult{Visit: visit}
+	result.Head = Head{}
 
 	if err = runFormAnalysis(ctx, &result); err != nil {
 		logger.Warn().Msgf("analyze task form analysis error: %v", err)
@@ -58,6 +68,10 @@ func performAnalyzeTask(ctx context.Context, task *Task, logger *zerolog.Logger)
 
 	if err = runLinkAnalysis(ctx, &result); err != nil {
 		logger.Warn().Msgf("analyze task href analysis error: %v", err)
+	}
+
+	if err = runHeadAnalysis(ctx, &result); err != nil {
+		logger.Warn().Msgf("analyze task head analysis error: %v", err)
 	}
 
 	return result, nil
@@ -139,6 +153,61 @@ func runLinkAnalysis(ctx context.Context, result *AnalyzeResult) error {
 			}
 
 			result.Links = append(result.Links, link)
+		}
+
+		return nil
+	}))
+}
+
+func runHeadAnalysis(ctx context.Context, result *AnalyzeResult) error {
+	return chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
+		var children []*cdp.Node
+
+		if err := chromedp.Nodes("head > *", &children, chromedp.ByQueryAll).Do(ctx); err != nil {
+			return err
+		}
+
+		for _, child := range children {
+			switch child.NodeName {
+			case "LINK":
+				var rel, href string
+
+				if err := chromedp.Run(
+					ctx,
+					chromedp.JavascriptAttribute(child.FullXPath(), "rel", &rel, chromedp.BySearch),
+					chromedp.JavascriptAttribute(child.FullXPath(), "href", &href, chromedp.BySearch),
+				); err != nil {
+					return err
+				}
+
+				switch rel {
+				case "icon":
+					result.Head.FaviconUrl = href
+				case "shortcut icon", "icon shortcut":
+					result.Head.ShortcutIconUrl = href
+				}
+			case "META":
+				var name, content string
+
+				if err := chromedp.Run(
+					ctx,
+					chromedp.JavascriptAttribute(child.FullXPath(), "name", &name, chromedp.BySearch),
+					chromedp.JavascriptAttribute(child.FullXPath(), "content", &content, chromedp.BySearch),
+				); err != nil {
+					return err
+				}
+
+				switch name {
+				case "description":
+					result.Head.Description = content
+				case "viewport":
+					result.Head.Viewport = content
+				}
+			case "TITLE":
+				if err := chromedp.Run(ctx, chromedp.TextContent(child.FullXPath(), &result.Head.Title, chromedp.BySearch)); err != nil {
+					return err
+				}
+			}
 		}
 
 		return nil

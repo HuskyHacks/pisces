@@ -3,9 +3,13 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/mjc-gh/pisces"
 	"github.com/mjc-gh/pisces/engine"
@@ -65,10 +69,47 @@ func main() {
 				Name:      "screenshot",
 				Usage:     "Screenshot one or more URLs",
 				Arguments: baseArgs,
-				Flags:     baseFlags,
+				Flags: append([]cli.Flag{
+					&cli.StringFlag{Name: "output-dir", Value: "tmp/", Aliases: []string{"o"}},
+				}, baseFlags...),
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					//return runTask(ctx, cmd, "screenshot")
-					return nil
+					return runTask(ctx, cmd, "screenshot", func(cmd *cli.Command, e *engine.Engine) error {
+						outputDir := cmd.String("output-dir")
+						err := os.MkdirAll(outputDir, 0755)
+						if err != nil {
+							return err
+						}
+
+						for r := range e.Results() {
+							if r.Error != nil {
+								logger.Warn().Msgf("result error: %v", r.Error)
+								continue
+							}
+
+							logger.Info().Msgf("result for %s (duration %s)", r.URL, r.Elapsed.String())
+
+							sr, ok := r.Result.(*engine.ScreenshotResult)
+							if !ok {
+								return errors.New("screenshot result error")
+							}
+
+							fileName, err := urlToFilename(r.URL)
+							if err != nil {
+								return err
+							}
+
+							out, err := os.Create(filepath.Join(outputDir, fmt.Sprintf("%s.png", fileName)))
+							if err != nil {
+								return err
+							}
+
+							if _, err = out.Write(*sr.Buffer); err != nil {
+								return err
+							}
+						}
+
+						return nil
+					})
 				},
 			},
 		},
@@ -166,4 +207,30 @@ func validDeviceSize(ctx context.Context, cmd *cli.Command, v string) error {
 	}
 
 	return nil
+}
+
+func urlToFilename(taskURL string) (string, error) {
+	u, err := url.Parse(taskURL)
+	if err != nil {
+		return "", err
+	}
+
+	domain := u.Host
+	path := u.Path
+
+	combined := domain + path
+	combined = strings.Trim(combined, "/")
+
+	safe := strings.Map(func(r rune) rune {
+		if r == '/' || r == '\\' || r == ':' || r == '*' || r == '?' || r == '"' || r == '<' || r == '>' || r == '|' || r == '.' {
+			return '_'
+		}
+		return r
+	}, combined)
+
+	if safe == "" {
+		safe = "index"
+	}
+
+	return safe, nil
 }
