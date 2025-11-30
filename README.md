@@ -162,19 +162,19 @@ See command specific help for output flags.
   },
   "requested_url": "https://login.yahoo.com/",
   "location": "https://login.yahoo.com/",
-  "redirectLocations": null,
+  "redirect_locations": null,
   "body": "<html id=\"Stencil\" lang=\"en-US\" class=\"js grid light-theme \"><he...",
-  "initialBody": "<!DOCTYPE html>\n<html id=\"Stencil\" lang=\"en-US\" class=\"no-js gri...",
+  "initial_body": "<!DOCTYPE html>\n<html id=\"Stencil\" lang=\"en-US\" class=\"no-js gri...",
   "assets": [
     {
       "url": "https://ups.analytics.yahoo.com/ups/58824/sync?format=json&gdpr=...",
-      "resourceType": "Fetch",
-      "requestHeaders": {
+      "resource_type": "Fetch",
+      "request_headers": {
         "Accept": "application/json",
         "Referer": "https://login.yahoo.com/",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
       },
-      "responseHeaders": {
+      "response_headers": {
         "access-control-allow-credentials": "true",
         "access-control-allow-origin": "https://login.yahoo.com",
         "age": "0",
@@ -191,13 +191,13 @@ See command specific help for output flags.
     },
     {
       "url": "https://opus.analytics.yahoo.com/tag/opus-frame.html?referrer=ht...",
-      "resourceType": "Document",
-      "requestHeaders": {
+      "resource_type": "Document",
+      "request_headers": {
         "Referer": "https://login.yahoo.com/",
         "Upgrade-Insecure-Requests": "1",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
       },
-      "responseHeaders": {
+      "response_headers": {
         "age": "48",
         "cache-control": "max-age=300",
         "content-encoding": "gzip",
@@ -219,22 +219,22 @@ See command specific help for output flags.
     },
     {
       "url": "https://ups.analytics.yahoo.com/ups/58746/sync?ui=12288b8a-c84e-...",
-      "resourceType": "Image",
-      "requestHeaders": {
+      "resource_type": "Image",
+      "request_headers": {
         "Referer": "",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
       },
-      "responseHeaders": null,
+      "response_headers": null,
       "body": ""
     },
     {
       "url": "https://s.yimg.com/ss/analytics3.js",
-      "resourceType": "Script",
-      "requestHeaders": {
+      "resource_type": "Script",
+      "request_headers": {
         "Referer": "https://login.yahoo.com/",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
       },
-      "responseHeaders": {
+      "response_headers": {
         "accept-ranges": "bytes",
         "age": "317",
         "ats-carp-promotion": "1, 1",
@@ -259,22 +259,22 @@ See command specific help for output flags.
     },
     {
       "url": "https://ups.analytics.yahoo.com/ups/58699/cms?partner_id=SEMAS&o...",
-      "resourceType": "Image",
-      "requestHeaders": {
+      "resource_type": "Image",
+      "request_headers": {
         "Referer": "",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
       },
-      "responseHeaders": null,
+      "response_headers": null,
       "body": ""
     },
     {
       "url": "https://consent.cmp.oath.com/cmp.js",
-      "resourceType": "Script",
-      "requestHeaders": {
+      "resource_type": "Script",
+      "request_headers": {
         "Referer": "https://login.yahoo.com/",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
       },
-      "responseHeaders": {
+      "response_headers": {
         "age": "14",
         "cache-control": "max-age=3600",
         "content-encoding": "gzip",
@@ -295,12 +295,12 @@ See command specific help for output flags.
     },
     {
       "url": "https://guce.yahoo.com/v1/consentRecord?consentTypes=iab%2CiabCC...",
-      "resourceType": "XHR",
-      "requestHeaders": {
+      "resource_type": "XHR",
+      "request_headers": {
         "Referer": "https://login.yahoo.com/",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
       },
-      "responseHeaders": {
+      "response_headers": {
         "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, User-Agent, X-Fo...",
         "Access-Control-Allow-Methods": "HEAD, GET, OPTIONS",
@@ -317,12 +317,12 @@ See command specific help for output flags.
     },
     {
       "url": "https://s.yimg.com/wm/mbr/2df03510d3a44bebaf3b767b14ccd6be88871c...",
-      "resourceType": "Stylesheet",
-      "requestHeaders": {
+      "resource_type": "Stylesheet",
+      "request_headers": {
         "Referer": "https://login.yahoo.com/",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
       },
-      "responseHeaders": {
+      "response_headers": {
         "accept-ranges": "bytes",
         "age": "8144",
         "ats-carp-promotion": "1, 1",
@@ -346,13 +346,13 @@ See command specific help for output flags.
     },
     {
       "url": "https://udc.yahoo.com/v2/public/yql?yhlVer=2&yhlClient=rapid&yhl...",
-      "resourceType": "XHR",
-      "requestHeaders": {
+      "request_headers": {
+      "resource_type": "XHR",
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         "Referer": "https://login.yahoo.com/",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
       },
-      "responseHeaders": {
+      "response_headers": {
         "access-control-allow-credentials": "true",
         "access-control-allow-origin": "https://login.yahoo.com",
         "age": "0",
@@ -370,12 +370,12 @@ See command specific help for output flags.
     },
     {
       "url": "https://www.googletagmanager.com/gtag/js?id=G-P9C3W3ESF1",
-      "resourceType": "Script",
-      "requestHeaders": {
+      "resource_type": "Script",
+      "request_headers": {
         "Referer": "https://login.yahoo.com/",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
       },
-      "responseHeaders": {
+      "response_headers": {
         "access-control-allow-credentials": "true",
         "access-control-allow-headers": "Cache-Control",
         "access-control-allow-origin": "*",
