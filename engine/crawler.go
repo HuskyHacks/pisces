@@ -42,7 +42,7 @@ type Asset struct {
 
 func NewCrawler(userAgent string, winWidth, winHeight int64) Crawler {
 	return Crawler{
-		make([]Visit, 1), userAgent, winWidth, winHeight,
+		make([]Visit, 0), userAgent, winWidth, winHeight,
 	}
 }
 
