@@ -13,6 +13,7 @@ import (
 
 type Task struct {
 	action    string
+	params    map[string]any
 	url       string
 	userAgent string
 	winHeight int
@@ -28,9 +29,11 @@ func NewTask(action, input string) Task {
 	}
 
 	return Task{
-		action:   action,
-		url:      url,
-		received: time.Now(),
+		action:    action,
+		received:  time.Now(),
+		url:       url,
+		winHeight: 720,
+		winWidth:  1280,
 	}
 }
 
@@ -40,6 +43,24 @@ func (t *Task) SetDevice(deviceType, deviceSize string) {
 
 func (t *Task) SetUserAgent(deviceType, userAgentAlias string) {
 	t.userAgent = browser.UserAgent(deviceType, userAgentAlias)
+}
+
+// Parsed from task parameters using the "wait" key. Expected to be an int64
+// value in milliseconds. Tasking will use this parameter as a timeout value
+// when querying chromedp for nodes. When no value is provided, 50 milliseconds
+// will be used.
+func (t Task) WaitFor() int64 {
+	val, ok := t.params["wait"]
+	if !ok {
+		return 50
+	}
+
+	wait, ok := val.(int64)
+	if !ok {
+		return 50
+	}
+
+	return wait
 }
 
 type Result struct {

@@ -3,6 +3,7 @@ package engine
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/chromedp"
@@ -62,26 +63,30 @@ func performAnalyzeTask(ctx context.Context, task *Task, logger *zerolog.Logger)
 	result := AnalyzeResult{Visit: visit}
 	result.Head = Head{}
 
-	if err = runFormAnalysis(ctx, &result); err != nil {
+	wait := task.WaitFor()
+
+	if err = runFormAnalysis(ctx, wait, &result); err != nil {
 		logger.Warn().Msgf("analyze task form analysis error: %v", err)
 	}
 
-	if err = runLinkAnalysis(ctx, &result); err != nil {
+	if err = runLinkAnalysis(ctx, wait, &result); err != nil {
 		logger.Warn().Msgf("analyze task href analysis error: %v", err)
 	}
 
-	if err = runHeadAnalysis(ctx, &result); err != nil {
+	if err = runHeadAnalysis(ctx, wait, &result); err != nil {
 		logger.Warn().Msgf("analyze task head analysis error: %v", err)
 	}
 
 	return result, nil
 }
 
-func runFormAnalysis(ctx context.Context, result *AnalyzeResult) error {
+func runFormAnalysis(ctx context.Context, wait int64, result *AnalyzeResult) error {
 	return chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
 		var formNodes []*cdp.Node
 
-		if err := chromedp.Nodes("form", &formNodes, chromedp.ByQueryAll).Do(ctx); err != nil {
+		if err := queryWithDeadline(ctx, wait, func(ctx context.Context) error {
+			return chromedp.Nodes("form", &formNodes, chromedp.ByQueryAll).Do(ctx)
+		}); err != nil {
 			return err
 		}
 
@@ -94,7 +99,9 @@ func runFormAnalysis(ctx context.Context, result *AnalyzeResult) error {
 
 		for idx, formNode := range formNodes {
 			var inputNodes []*cdp.Node
-			if err := chromedp.Nodes("input, textarea, select", &inputNodes, chromedp.FromNode(formNode)).Do(ctx); err != nil {
+			if err := queryWithDeadline(ctx, wait, func(ctx context.Context) error {
+				return chromedp.Nodes("input, textarea, select", &inputNodes, chromedp.FromNode(formNode)).Do(ctx)
+			}); err != nil {
 				return err
 			}
 
@@ -125,11 +132,13 @@ func runFormAnalysis(ctx context.Context, result *AnalyzeResult) error {
 	}))
 }
 
-func runLinkAnalysis(ctx context.Context, result *AnalyzeResult) error {
+func runLinkAnalysis(ctx context.Context, wait int64, result *AnalyzeResult) error {
 	return chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
 		var anchorNodes []*cdp.Node
 
-		if err := chromedp.Nodes("a[href]", &anchorNodes, chromedp.ByQueryAll).Do(ctx); err != nil {
+		if err := queryWithDeadline(ctx, wait, func(ctx context.Context) error {
+			return chromedp.Nodes("a[href]", &anchorNodes, chromedp.ByQueryAll).Do(ctx)
+		}); err != nil {
 			return err
 		}
 
@@ -159,11 +168,13 @@ func runLinkAnalysis(ctx context.Context, result *AnalyzeResult) error {
 	}))
 }
 
-func runHeadAnalysis(ctx context.Context, result *AnalyzeResult) error {
+func runHeadAnalysis(ctx context.Context, wait int64, result *AnalyzeResult) error {
 	return chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
 		var children []*cdp.Node
 
-		if err := chromedp.Nodes("head > *", &children, chromedp.ByQueryAll).Do(ctx); err != nil {
+		if err := queryWithDeadline(ctx, wait, func(ctx context.Context) error {
+			return chromedp.Nodes("head > *", &children, chromedp.ByQueryAll).Do(ctx)
+		}); err != nil {
 			return err
 		}
 
@@ -212,6 +223,18 @@ func runHeadAnalysis(ctx context.Context, result *AnalyzeResult) error {
 
 		return nil
 	}))
+}
+
+func queryWithDeadline(ctx context.Context, wait int64, callback func(context.Context) error) error {
+	queryCtx, queryCancel := context.WithTimeout(ctx, time.Duration(wait)*time.Millisecond)
+	defer queryCancel()
+
+	err := callback(queryCtx)
+	if err == context.DeadlineExceeded {
+		return nil
+	}
+
+	return err
 }
 
 func attributesFromNodes(ctx context.Context, nodes []*cdp.Node, attributes []string) ([][]string, error) {

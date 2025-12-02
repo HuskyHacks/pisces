@@ -115,7 +115,7 @@ func (c *Crawler) Visit(ctx context.Context, url string, logger *zerolog.Logger)
 		}
 	})
 
-	initialSteps := []chromedp.Action{
+	visitSteps := []chromedp.Action{
 		network.Enable(),
 		chromedp.EmulateViewport(int64(c.winWidth), int64(c.winHeight)),
 		emulation.SetUserAgentOverride(c.userAgent),
@@ -124,7 +124,7 @@ func (c *Crawler) Visit(ctx context.Context, url string, logger *zerolog.Logger)
 		chromedp.OuterHTML("html", &visit.Body),
 	}
 
-	if err := chromedp.Run(ctx, initialSteps...); err != nil {
+	if err := chromedp.Run(ctx, visitSteps...); err != nil {
 		return err
 	}
 

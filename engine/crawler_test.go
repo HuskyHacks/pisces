@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/chromedp/chromedp"
 	"github.com/mjc-gh/pisces"
 	"github.com/mjc-gh/pisces/internal/piscestest"
 	"github.com/stretchr/testify/assert"
@@ -17,16 +18,14 @@ func matchAsset(fileName string) func(*Asset) bool {
 }
 
 func TestCrawlerVisit(t *testing.T) {
-	ctx, _ := piscestest.NewTestContext()
+	ctx, _ := chromedp.NewContext(piscestest.NewTestContext())
 	server := piscestest.NewTestWebServer("simple")
-
 	crawler := NewCrawler("pisces", 1920, 1080)
-	err := crawler.Visit(ctx, server.URL, pisces.Logger())
 
+	err := crawler.Visit(ctx, server.URL, pisces.Logger())
 	assert.NoError(t, err)
 
 	visit := crawler.LastVisit()
-
 	assert.NotNil(t, visit)
 	assert.NotEmpty(t, visit.RequestedUrl)
 	assert.NotEmpty(t, visit.Location)
