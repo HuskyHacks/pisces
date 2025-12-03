@@ -18,12 +18,13 @@ type Crawler struct {
 }
 
 type Visit struct {
-	RequestedUrl      string     `json:"requested_url"`
-	Location          string     `json:"location"`
-	RedirectLocations []Redirect `json:"redirect_locations"`
-	Body              string     `json:"body"`
-	InitialBody       string     `json:"initial_body"`
-	Assets            []*Asset   `json:"assets"`
+	RequestedUrl      string           `json:"requested_url"`
+	Location          string           `json:"location"`
+	RedirectLocations []Redirect       `json:"redirect_locations"`
+	CertificateInfo   *CertificateInfo `json:"certificate_info"`
+	Body              string           `json:"body"`
+	InitialBody       string           `json:"initial_body"`
+	Assets            []*Asset         `json:"assets"`
 
 	assetsMap map[string]*Asset
 }
@@ -101,21 +102,15 @@ func (c *Crawler) Visit(ctx context.Context, url string, logger *zerolog.Logger)
 			}
 
 		case *network.EventResponseReceived:
+			secDetails := ev.Response.SecurityDetails
+
 			if asset, ok := visit.assetsMap[string(ev.RequestID)]; ok {
+				asset.CertificateInfo = getCertInfo(secDetails)
 				asset.ResponseHeaders = ev.Response.Headers
 				asset.ResponseStatus = ev.Response.Status
 
-				secDetails := ev.Response.SecurityDetails
-				if secDetails != nil && secDetails.Protocol != "" && secDetails.Issuer != "" {
-					asset.CertificateInfo = &CertificateInfo{
-						secDetails.Protocol,
-						secDetails.Issuer,
-						secDetails.SubjectName,
-						secDetails.ValidFrom.Time(),
-						secDetails.ValidTo.Time(),
-						secDetails.SanList,
-					}
-				}
+			} else if mainReqID == ev.RequestID {
+				visit.CertificateInfo = getCertInfo(secDetails)
 			}
 		case *network.EventLoadingFinished:
 			if ev.RequestID == mainReqID {
@@ -191,4 +186,19 @@ func getResponseBody(ctx context.Context, reqID network.RequestID, callback func
 	}
 
 	callback(body, nil)
+}
+
+func getCertInfo(secDetails *network.SecurityDetails) *CertificateInfo {
+	if secDetails != nil && secDetails.Protocol != "" && secDetails.Issuer != "" {
+		return &CertificateInfo{
+			secDetails.Protocol,
+			secDetails.Issuer,
+			secDetails.SubjectName,
+			secDetails.ValidFrom.Time(),
+			secDetails.ValidTo.Time(),
+			secDetails.SanList,
+		}
+	}
+
+	return nil
 }

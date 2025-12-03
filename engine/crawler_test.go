@@ -34,6 +34,7 @@ func TestCrawlerVisit(t *testing.T) {
 	assert.Empty(t, visit.RedirectLocations)
 	assert.NotContains(t, visit.InitialBody, "Hello world!")
 	assert.Contains(t, visit.Body, "Hello world!")
+	assert.Nil(t, visit.CertificateInfo)
 
 	scriptIdx := slices.IndexFunc(visit.Assets, matchAsset("script.js"))
 	scriptAsset := visit.Assets[scriptIdx]
