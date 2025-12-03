@@ -42,6 +42,7 @@ func TestCrawlerVisit(t *testing.T) {
 	assert.NotEmpty(t, scriptAsset.ResponseHeaders)
 	assert.NotEmpty(t, scriptAsset.Body)
 	assert.NotEmpty(t, scriptAsset.InitiatorURL)
+	assert.Nil(t, scriptAsset.CertificateInfo)
 
 	styleIdx := slices.IndexFunc(visit.Assets, matchAsset("style.css"))
 	styleAsset := visit.Assets[styleIdx]
@@ -50,6 +51,7 @@ func TestCrawlerVisit(t *testing.T) {
 	assert.NotEmpty(t, styleAsset.ResponseHeaders)
 	assert.NotEmpty(t, styleAsset.Body)
 	assert.NotEmpty(t, styleAsset.InitiatorURL)
+	assert.Nil(t, scriptAsset.CertificateInfo)
 }
 
 func TestCrawlerLastVisitWithoutAnyVisits(t *testing.T) {

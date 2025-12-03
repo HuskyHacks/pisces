@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"time"
 
 	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/network"
@@ -33,12 +34,22 @@ type Redirect struct {
 }
 
 type Asset struct {
-	URL             string         `json:"url"`
-	ResourceType    string         `json:"resource_type"`
-	RequestHeaders  map[string]any `json:"request_headers"`
-	ResponseHeaders map[string]any `json:"response_headers"`
-	InitiatorURL    string         `json:"initiator_url,omitempty"`
-	Body            string         `json:"body,omitempty"`
+	URL             string           `json:"url"`
+	CertificateInfo *CertificateInfo `json:"certificate_info,omitempty"`
+	ResourceType    string           `json:"resource_type"`
+	RequestHeaders  map[string]any   `json:"request_headers"`
+	ResponseHeaders map[string]any   `json:"response_headers"`
+	InitiatorURL    string           `json:"initiator_url,omitempty"`
+	Body            string           `json:"body,omitempty"`
+}
+
+type CertificateInfo struct {
+	Protocol    string    `json:"protocol"`
+	Issuer      string    `json:"issuers"`
+	SubjectName string    `json:"subject_name"`
+	ValidFrom   time.Time `json:"valid_from"`
+	ValidTo     time.Time `json:"valid_to"`
+	SANs        []string  `json:"sans,omitempty"`
 }
 
 func NewCrawler(userAgent string, winWidth, winHeight int64) Crawler {
@@ -91,6 +102,18 @@ func (c *Crawler) Visit(ctx context.Context, url string, logger *zerolog.Logger)
 		case *network.EventResponseReceived:
 			if asset, ok := visit.assetsMap[string(ev.RequestID)]; ok {
 				asset.ResponseHeaders = ev.Response.Headers
+
+				secDetails := ev.Response.SecurityDetails
+				if secDetails != nil && secDetails.Protocol != "" && secDetails.Issuer != "" {
+					asset.CertificateInfo = &CertificateInfo{
+						secDetails.Protocol,
+						secDetails.Issuer,
+						secDetails.SubjectName,
+						secDetails.ValidFrom.Time(),
+						secDetails.ValidTo.Time(),
+						secDetails.SanList,
+					}
+				}
 			}
 		case *network.EventLoadingFinished:
 			if ev.RequestID == mainReqID {
