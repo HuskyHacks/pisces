@@ -57,6 +57,8 @@ See command specific help for output flags.
 
 ### Result Output
 
+Below is an example of the `analyze` task's output for a single visit to `login.yahoo.com`. Some of the assets and response details have been truncated for brevity.
+
 ```json
 {
   "forms": [
@@ -69,17 +71,17 @@ See command specific help for output flags.
         {
           "name": "browser-fp-data",
           "type": "hidden",
-          "value": "{\"language\":\"en-US\",\"colorDepth\":24,\"deviceMemory\":8,\"pixelRatio..."
+          "value": "{\"language\":\"en-US\",\"colorDepth\":24,\"deviceMemory\":8,\"pixelRatio\":1,\"hardwareConcurrency\":10,\"timezoneOffset\":300,\"timezone\":\"America/New_York\",\"sessionStorage\":1,\"localStorage\":1,\"indexedDb\":1,\"cpuClass\":\"unknown\",\"platform\":\"MacIntel\",\"doNotTrack\":\"unknown\",\"plugins\":{\"count\":5,\"hash\":\"2c14024bf8584c3f7f63f24ea490e812\"},\"canvas\":\"canvas winding:yes~canvas\",\"webgl\":1,\"webglVendorAndRenderer\":\"Google Inc. (Apple)~ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)\",\"adBlock\":0,\"hasLiedLanguages\":0,\"hasLiedResolution\":0,\"hasLiedOs\":1,\"hasLiedBrowser\":0,\"touchSupport\":{\"points\":0,\"event\":0,\"start\":0},\"fonts\":{\"count\":27,\"hash\":\"d52a1516cfb5f1c2d8a427c14bc3645f\"},\"audio\":\"124.04347745512496\",\"resolution\":{\"w\":\"800\",\"h\":\"600\"},\"availableResolution\":{\"w\":\"600\",\"h\":\"800\"},\"ts\":{\"serve\":1764736582612,\"render\":1764736582902}}"
         },
         {
           "name": "crumb",
           "type": "hidden",
-          "value": "7R0rwaAoHkrnKe/zXO8I1A"
+          "value": "UF/63CgZqrqctVz4oFZYcg"
         },
         {
           "name": "acrumb",
           "type": "hidden",
-          "value": "VmquGmZi"
+          "value": "X4mBJNPf"
         },
         {
           "name": "sessionIndex",
@@ -130,7 +132,7 @@ See command specific help for output flags.
       "text": "\n            \n            \n        "
     },
     {
-      "href": "https://help.yahoo.com/kb/index?locale=en_US&page=product&y=PROD...",
+      "href": "https://help.yahoo.com/kb/index?locale=en_US&page=product&y=PROD_ACCT",
       "text": "Help"
     },
     {
@@ -148,38 +150,154 @@ See command specific help for output flags.
       "text": "Forgot username?"
     },
     {
-      "href": "https://login.yahoo.com/account/create?specId=yidregsimplified&d...",
+      "href": "https://login.yahoo.com/account/create?specId=yidregsimplified&done=https%3A%2F%2Fwww.yahoo.com",
       "text": "Create an account",
       "class": "pure-button puree-button-secondary challenge-button"
     }
   ],
   "head": {
     "title": "Login - Sign in to Yahoo",
-    "description": "Sign in to access the best in class Yahoo Mail, breaking local, ...",
+    "description": "Sign in to access the best in class Yahoo Mail, breaking local, national and global news, finance, sports, music, movies... You get more out of the web, you get more out of life.",
     "favicon_url": "https://s.yimg.com/wm/mbr/images/yahoo-yep-favicon-v1.ico",
     "shortcut_icon_url": "https://s.yimg.com/wm/mbr/images/yahoo-yep-favicon-v1.ico",
-    "viewport": "initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit..."
+    "viewport": "initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no"
   },
   "requested_url": "https://login.yahoo.com/",
   "location": "https://login.yahoo.com/",
   "redirect_locations": null,
-  "body": "<html id=\"Stencil\" lang=\"en-US\" class=\"js grid light-theme \"><he...",
-  "initial_body": "<!DOCTYPE html>\n<html id=\"Stencil\" lang=\"en-US\" class=\"no-js gri...",
+  "certificate_info": {
+    "protocol": "TLS 1.3",
+    "issuers": "DigiCert Global G2 TLS RSA SHA256 2020 CA1",
+    "subject_name": "login.yahoo.com",
+    "valid_from": "2025-12-02T19:00:00-05:00",
+    "valid_to": "2026-03-04T18:59:59-05:00",
+    "sans": [
+      "login.yahoo.com",
+      "*.pr.login.yahoo.com",
+      "*.pr.login.aol.com",
+      "*.pr.login.engadget.com"
+    ]
+  },
+  "body": "<html id=\"Stencil\" lang=\"en-US\" c",
+  "initial_body": "<!DOCTYPE html>\n<html id=\"Stencil",
   "assets": [
     {
-      "url": "https://ups.analytics.yahoo.com/ups/58824/sync?format=json&gdpr=...",
+      "url": "https://opus.analytics.yahoo.com/",
+      "certificate_info": {
+        "protocol": "TLS 1.3",
+        "issuers": "DigiCert SHA2 High Assurance Server CA",
+        "subject_name": "opus.analytics.yahoo.com",
+        "valid_from": "2025-09-23T20:00:00-04:00",
+        "valid_to": "2025-12-24T18:59:59-05:00",
+        "sans": [
+          "opus.analytics.yahoo.com",
+          "prod.opus.aolp-ds-prd.aws.oath.cloud"
+        ]
+      },
+      "resource_type": "Document",
+      "request_headers": {
+        "Referer": "https://login.yahoo.com/",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+      },
+      "response_headers": {
+        "age": "271",
+        "cache-control": "max-age=300",
+        "content-encoding": "gzip",
+        "content-security-policy": "default-src https:; script-src https: 'unsafe-inline'; style-src https: 'unsafe-inline'",
+        "content-type": "text/html",
+        "date": "Wed, 03 Dec 2025 04:31:53 GMT",
+        "etag": "W/\"f4613eae0fc38a92bed7c46fc8baeefc\"",
+        "last-modified": "Tue, 14 Oct 2025 13:44:16 GMT",
+        "server": "AmazonS3",
+        "vary": "accept-encoding",
+        "via": "1.1 79bf0c7fd285682183c6a826f8dfe31e.cloudfront.net (CloudFront)",
+        "x-amz-cf-id": "ZYRlvwBsjbtTfSTHT2QYx5b5ow3uozMYClodK9GuQP4z04LWKQpMMA==",
+        "x-amz-cf-pop": "JFK50-P14",
+        "x-amz-expiration": "expiry-date=\"Thu, 19 Nov 2026 00:00:00 GMT\", rule-id=\"standard-lifecycle\"",
+        "x-amz-server-side-encryption": "AES256",
+        "x-cache": "Hit from cloudfront"
+      },
+      "response_status": 200,
+      "body": "<!DOCTYPE html><html lang=\"en\"><h"
+    },
+    {
+      "url": "https://ups.analytics.yahoo.com/u",
+      "resource_type": "Image",
+      "request_headers": {
+        "Referer": "",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+      },
+      "response_headers": null,
+      "initiator_url": "https://login.yahoo.com/"
+    },
+    {
+      "url": "https://opus.analytics.yahoo.com/",
+      "certificate_info": {
+        "protocol": "TLS 1.3",
+        "issuers": "DigiCert SHA2 High Assurance Server CA",
+        "subject_name": "opus.analytics.yahoo.com",
+        "valid_from": "2025-09-23T20:00:00-04:00",
+        "valid_to": "2025-12-24T18:59:59-05:00",
+        "sans": [
+          "opus.analytics.yahoo.com",
+          "prod.opus.aolp-ds-prd.aws.oath.cloud"
+        ]
+      },
+      "resource_type": "Script",
+      "request_headers": {
+        "Referer": "https://login.yahoo.com/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+      },
+      "response_headers": {
+        "age": "169",
+        "cache-control": "max-age=300",
+        "content-encoding": "gzip",
+        "content-security-policy": "default-src https:; script-src https: 'unsafe-inline'; style-src https: 'unsafe-inline'",
+        "content-type": "application/javascript",
+        "date": "Wed, 03 Dec 2025 04:33:34 GMT",
+        "etag": "W/\"5d5fd12b6bd2f3056713173b99d51c4f\"",
+        "last-modified": "Tue, 14 Oct 2025 13:44:16 GMT",
+        "server": "AmazonS3",
+        "vary": "accept-encoding",
+        "via": "1.1 79bf0c7fd285682183c6a826f8dfe31e.cloudfront.net (CloudFront)",
+        "x-amz-cf-id": "qKeFwrH3J4gNk99Cv2HiOts8rdwdnp5zf5xliL011RyQkos5BqkA4g==",
+        "x-amz-cf-pop": "JFK50-P14",
+        "x-amz-expiration": "expiry-date=\"Thu, 19 Nov 2026 00:00:00 GMT\", rule-id=\"standard-lifecycle\"",
+        "x-amz-server-side-encryption": "AES256",
+        "x-cache": "Hit from cloudfront"
+      },
+      "response_status": 200,
+      "initiator_url": "https://login.yahoo.com/",
+      "body": "(()=>{\"use strict\";var n=function"
+    },
+    {
+      "url": "https://ups.analytics.yahoo.com/u",
+      "certificate_info": {
+        "protocol": "TLS 1.3",
+        "issuers": "DigiCert Global G2 TLS RSA SHA256 2020 CA1",
+        "subject_name": "*.pubgw.ads.yahoo.com",
+        "valid_from": "2025-11-30T19:00:00-05:00",
+        "valid_to": "2026-01-21T18:59:59-05:00",
+        "sans": [
+          "*.pubgw.ads.yahoo.com",
+          "client.tools.advertising.yahoo.com",
+          "*.fc.yahoo.com",
+          "fc.yahoo.com"
+        ]
+      },
       "resource_type": "Fetch",
       "request_headers": {
         "Accept": "application/json",
         "Referer": "https://login.yahoo.com/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
       },
       "response_headers": {
         "access-control-allow-credentials": "true",
         "access-control-allow-origin": "https://login.yahoo.com",
         "age": "0",
         "content-type": "application/json",
-        "date": "Wed, 26 Nov 2025 03:56:15 GMT",
+        "date": "Wed, 03 Dec 2025 04:36:23 GMT",
         "p3p": "CP=NOI DSP COR LAW CURa DEVa TAIa PSAa PSDa OUR BUS UNI COM NAV",
         "referrer-policy": "no-referrer-when-downgrade",
         "server": "ATS",
@@ -187,144 +305,32 @@ See command specific help for output flags.
         "vary": "Origin",
         "x-content-type-options": "nosniff"
       },
-      "body": "{\"axid\": \"eS0zMVRoVFpWRTJ1R19nN1dId1NuR1VhQzZFaGNXNnR2Tn5B\"}"
+      "response_status": 200,
+      "body": "{\"axid\": \"y-wHs6xtdE2uLXOHSbaN5Lu"
     },
     {
-      "url": "https://opus.analytics.yahoo.com/tag/opus-frame.html?referrer=ht...",
-      "resource_type": "Document",
-      "request_headers": {
-        "Referer": "https://login.yahoo.com/",
-        "Upgrade-Insecure-Requests": "1",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
+      "url": "https://s.yimg.com/wm/mbr/2df0351",
+      "certificate_info": {
+        "protocol": "TLS 1.3",
+        "issuers": "DigiCert Global G2 TLS RSA SHA256 2020 CA1",
+        "subject_name": "*.www.yahoo.com",
+        "valid_from": "2025-11-13T19:00:00-05:00",
+        "valid_to": "2025-12-31T18:59:59-05:00",
+        "sans": [
+          "*.www.yahoo.com",
+          "*.yahoo.com",
+          "ymail.com",
+          "s.yimg.com"
+        ]
       },
-      "response_headers": {
-        "age": "48",
-        "cache-control": "max-age=300",
-        "content-encoding": "gzip",
-        "content-security-policy": "default-src https:; script-src https: 'unsafe-inline'; style-src...",
-        "content-type": "text/html",
-        "date": "Wed, 26 Nov 2025 03:55:28 GMT",
-        "etag": "W/\"f4613eae0fc38a92bed7c46fc8baeefc\"",
-        "last-modified": "Tue, 14 Oct 2025 13:44:16 GMT",
-        "server": "AmazonS3",
-        "vary": "accept-encoding",
-        "via": "1.1 c37f72766931ae9c3f146ffa54018d1c.cloudfront.net (CloudFront)",
-        "x-amz-cf-id": "nE_3ar0XxI60YKSKlTKp3l6LfhYWU7k6bE2vff8hQ6TSCjjb9GDBwA==",
-        "x-amz-cf-pop": "IAD89-C2",
-        "x-amz-expiration": "expiry-date=\"Thu, 19 Nov 2026 00:00:00 GMT\", rule-id=\"standard-l...",
-        "x-amz-server-side-encryption": "AES256",
-        "x-cache": "Hit from cloudfront"
-      },
-      "body": "<!DOCTYPE html><html lang=\"en\"><head><meta http-equiv=\"Content-T..."
-    },
-    {
-      "url": "https://ups.analytics.yahoo.com/ups/58746/sync?ui=12288b8a-c84e-...",
-      "resource_type": "Image",
-      "request_headers": {
-        "Referer": "",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
-      },
-      "response_headers": null,
-      "body": ""
-    },
-    {
-      "url": "https://s.yimg.com/ss/analytics3.js",
-      "resource_type": "Script",
-      "request_headers": {
-        "Referer": "https://login.yahoo.com/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
-      },
-      "response_headers": {
-        "accept-ranges": "bytes",
-        "age": "317",
-        "ats-carp-promotion": "1, 1",
-        "cache-control": "max-age=600",
-        "content-encoding": "gzip",
-        "content-length": "26272",
-        "content-type": "application/javascript",
-        "date": "Wed, 26 Nov 2025 03:50:58 GMT",
-        "etag": "\"e9326f2295b4bcb1f5e00bd1beabd834-df\"",
-        "last-modified": "Wed, 19 Nov 2025 15:52:02 GMT",
-        "referrer-policy": "no-referrer-when-downgrade",
-        "server": "ATS",
-        "strict-transport-security": "max-age=31536000",
-        "vary": "Origin, Accept-Encoding",
-        "x-amz-id-2": "ljzdKpXqSyYpFhwNCBOMt0sxekat7QW/XWuHrRmqYgsrvcgMFg9BjjnShcpDmxrE...",
-        "x-amz-request-id": "HKX10151GA9A7Y03",
-        "x-amz-server-side-encryption": "AES256",
-        "x-amz-version-id": "cbSPIsTp1M0ri3bgXk5_1tHUEmPorm9z",
-        "x-content-type-options": "nosniff"
-      },
-      "body": "(function(De){typeof define==\"function\"&&define.amd?define(De):D..."
-    },
-    {
-      "url": "https://ups.analytics.yahoo.com/ups/58699/cms?partner_id=SEMAS&o...",
-      "resource_type": "Image",
-      "request_headers": {
-        "Referer": "",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
-      },
-      "response_headers": null,
-      "body": ""
-    },
-    {
-      "url": "https://consent.cmp.oath.com/cmp.js",
-      "resource_type": "Script",
-      "request_headers": {
-        "Referer": "https://login.yahoo.com/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
-      },
-      "response_headers": {
-        "age": "14",
-        "cache-control": "max-age=3600",
-        "content-encoding": "gzip",
-        "content-type": "application/javascript",
-        "date": "Wed, 26 Nov 2025 03:56:01 GMT",
-        "etag": "W/\"4a32d9ba7441f8aae6da12a24a62bcfe\"",
-        "last-modified": "Wed, 08 Oct 2025 17:34:03 GMT",
-        "server": "AmazonS3",
-        "vary": "accept-encoding",
-        "via": "1.1 53b70ac9dc46d1c13992b291cf22a9aa.cloudfront.net (CloudFront)",
-        "x-amz-cf-id": "rBL-Hp-Jm5d-zGpb80iQJF1ATmfW0wdff396HEFUJTIN2uQxRFCC-A==",
-        "x-amz-cf-pop": "IAD12-P3",
-        "x-amz-expiration": "expiry-date=\"Wed, 09 Oct 2030 00:00:00 GMT\", rule-id=\"webapp-sta...",
-        "x-amz-server-side-encryption": "AES256",
-        "x-cache": "Hit from cloudfront"
-      },
-      "body": "/*! CMP 7.0.2 Copyright 2018 Oath Holdings, Inc. */\n!function(){..."
-    },
-    {
-      "url": "https://guce.yahoo.com/v1/consentRecord?consentTypes=iab%2CiabCC...",
-      "resource_type": "XHR",
-      "request_headers": {
-        "Referer": "https://login.yahoo.com/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
-      },
-      "response_headers": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, User-Agent, X-Fo...",
-        "Access-Control-Allow-Methods": "HEAD, GET, OPTIONS",
-        "Access-Control-Allow-Origin": "https://login.yahoo.com",
-        "Connection": "keep-alive",
-        "Content-Encoding": "gzip",
-        "Content-Length": "131",
-        "Content-Type": "application/json",
-        "Date": "Wed, 26 Nov 2025 03:56:14 GMT",
-        "Server": "guce",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
-      },
-      "body": "{\"identifier\":\"62tv745kicuiu\",\"identifierType\":\"bid\",\"tosRecords..."
-    },
-    {
-      "url": "https://s.yimg.com/wm/mbr/2df03510d3a44bebaf3b767b14ccd6be88871c...",
       "resource_type": "Stylesheet",
       "request_headers": {
         "Referer": "https://login.yahoo.com/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
       },
       "response_headers": {
         "accept-ranges": "bytes",
-        "age": "8144",
+        "age": "615352",
         "ats-carp-promotion": "1, 1",
         "cache-control": "public,max-age=31536000",
         "content-encoding": "gzip",
@@ -337,62 +343,96 @@ See command specific help for output flags.
         "server": "ATS",
         "strict-transport-security": "max-age=31536000",
         "vary": "Accept-Encoding",
-        "x-amz-id-2": "GZV1V9Bma5jc55qieSFFIzxo+QrTkuxhSF3ltD0tBogAKxSk4CAQRY5rGDSpKMLA...",
+        "x-amz-id-2": "GZV1V9Bma5jc55qieSFFIzxo+QrTkuxhSF3ltD0tBogAKxSk4CAQRY5rGDSpKMLAT+S0UK7O/yc=",
         "x-amz-request-id": "QE7Y5D42W80466XZ",
         "x-amz-server-side-encryption": "AES256",
         "x-content-type-options": "nosniff"
       },
-      "body": "@font-face{font-family:\"Yahoo Sans\";font-display:block;src:url(h..."
+      "response_status": 200,
+      "initiator_url": "https://login.yahoo.com/",
+      "body": "@font-face{font-family:\"Yahoo San"
     },
     {
-      "url": "https://udc.yahoo.com/v2/public/yql?yhlVer=2&yhlClient=rapid&yhl...",
+      "url": "https://s.yimg.com/bw/fonts/yahoo",
+      "certificate_info": {
+        "protocol": "TLS 1.3",
+        "issuers": "DigiCert Global G2 TLS RSA SHA256 2020 CA1",
+        "subject_name": "*.www.yahoo.com",
+        "valid_from": "2025-11-13T19:00:00-05:00",
+        "valid_to": "2025-12-31T18:59:59-05:00",
+        "sans": [
+          "*.www.yahoo.com",
+          "*.yahoo.com",
+          "ymail.com",
+          "s.yimg.com"
+        ]
+      },
+      "resource_type": "Font",
       "request_headers": {
-      "resource_type": "XHR",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "Referer": "https://login.yahoo.com/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
+        "Origin": "https://login.yahoo.com",
+        "Referer": "https://s.yimg.com/wm/mbr/2df03510d3a44bebaf3b767b14ccd6be88871cfc/yahoo-main.css",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
       },
       "response_headers": {
-        "access-control-allow-credentials": "true",
-        "access-control-allow-origin": "https://login.yahoo.com",
-        "age": "0",
-        "cache-control": "no-store, no-cache, private, max-age=0",
-        "date": "Wed, 26 Nov 2025 03:56:14 GMT",
-        "expires": "-1",
-        "p3p": "policyref=\"http://info.yahoo.com/w3c/p3p.xml\", CP=\"CAO DSP COR C...",
-        "pragma": "no-cache",
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "280742",
+        "ats-carp-promotion": "1, 1",
+        "cache-control": "public, max-age=604800",
+        "content-length": "34588",
+        "content-type": "font/woff2",
+        "date": "Sat, 29 Nov 2025 22:37:21 GMT",
+        "etag": "\"492a0a160b8da9414134282ef8b62f78\"",
+        "last-modified": "Fri, 14 Feb 2025 01:59:26 GMT",
+        "referrer-policy": "no-referrer-when-downgrade",
         "server": "ATS",
         "strict-transport-security": "max-age=31536000",
         "vary": "Origin",
-        "x-envoy-upstream-service-time": "1"
+        "x-amz-id-2": "ieUBmgK49fqSaIPnsHM9tYFIu0CdQKCDM+0UhxXQNzeDcOmAm8SDvIaoWj2gPYxgmkUUyCO5U2I=",
+        "x-amz-request-id": "GBNAGTQVZZGVP4CF",
+        "x-amz-server-side-encryption": "AES256",
+        "x-amz-version-id": "wUt5QWMHFonqO_Z13wqeP1wud1inlbiC",
+        "x-content-type-options": "nosniff"
       },
-      "body": ""
+      "response_status": 200,
+      "initiator_url": "https://s.yimg.com/wm/mbr/2df0351",
+      "body": "wOF2\u0000\u0001\u0000\u0000\u0000\u0000�\u001c\u0000\u0011\u0000\u0000\u0000\u0001\u0015\u0014\u0000\u0000��\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"
     },
     {
-      "url": "https://www.googletagmanager.com/gtag/js?id=G-P9C3W3ESF1",
-      "resource_type": "Script",
+      "url": "https://guce.yahoo.com/v1/consent",
+      "certificate_info": {
+        "protocol": "TLS 1.2",
+        "issuers": "DigiCert SHA2 High Assurance Server CA",
+        "subject_name": "guce.oath.com",
+        "valid_from": "2025-08-20T20:00:00-04:00",
+        "valid_to": "2026-02-11T18:59:59-05:00",
+        "sans": [
+          "guce.oath.com",
+          "guce.yahoo.com",
+          "guce.aol.com",
+          "guce.engadget.com"
+        ]
+      },
+      "resource_type": "XHR",
       "request_headers": {
         "Referer": "https://login.yahoo.com/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH..."
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
       },
       "response_headers": {
-        "access-control-allow-credentials": "true",
-        "access-control-allow-headers": "Cache-Control",
-        "access-control-allow-origin": "*",
-        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
-        "cache-control": "private, max-age=900",
-        "content-encoding": "zstd",
-        "content-length": "145405",
-        "content-type": "application/javascript; charset=UTF-8",
-        "cross-origin-resource-policy": "cross-origin",
-        "date": "Wed, 26 Nov 2025 03:56:14 GMT",
-        "expires": "Wed, 26 Nov 2025 03:56:14 GMT",
-        "server": "Google Tag Manager",
-        "strict-transport-security": "max-age=31536000; includeSubDomains",
-        "vary": "Accept-Encoding",
-        "x-xss-protection": "0"
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, User-Agent, X-Forwarded-For, X-Oath-Gcrumb",
+        "Access-Control-Allow-Methods": "HEAD, GET, OPTIONS",
+        "Access-Control-Allow-Origin": "https://login.yahoo.com",
+        "Connection": "keep-alive",
+        "Content-Encoding": "gzip",
+        "Content-Length": "131",
+        "Content-Type": "application/json",
+        "Date": "Wed, 03 Dec 2025 04:36:23 GMT",
+        "Server": "guce",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
       },
-      "body": "\n// Copyright 2012 Google Inc. All rights reserved.\n \n(function(..."
+      "response_status": 200,
+      "body": "{\"identifier\":\"fn1jb6pkivfi6\",\"id"
     }
   ]
 }
