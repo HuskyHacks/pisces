@@ -14,7 +14,10 @@ func TestPerformScreenshotTask(t *testing.T) {
 	server := piscestest.NewTestWebServer("simple")
 	task := NewTask("screenshot", server.URL)
 
-	sr, err := performScreenshotTask(piscestest.NewTestContext(), &task, pisces.Logger())
+	ctx, cancel := piscestest.NewTestContext()
+	defer cancel()
+
+	sr, err := performScreenshotTask(ctx, &task, pisces.Logger())
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, sr.Buffer)

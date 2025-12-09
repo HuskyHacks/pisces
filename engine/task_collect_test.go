@@ -12,7 +12,10 @@ func TestPerformCollectTask(t *testing.T) {
 	server := piscestest.NewTestWebServer("simple")
 	task := NewTask("collect", server.URL)
 
-	cr, err := performCollectTask(piscestest.NewTestContext(), &task, pisces.Logger())
+	ctx, cancel := piscestest.NewTestContext()
+	defer cancel()
+
+	cr, err := performCollectTask(ctx, &task, pisces.Logger())
 
 	assert.NoError(t, err)
 	assert.Equal(t, len(cr.InitialBody), cr.InitialBodyLength)

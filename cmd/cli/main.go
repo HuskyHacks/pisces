@@ -31,6 +31,7 @@ func main() {
 	baseFlags := []cli.Flag{
 		&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}},
 		&cli.BoolFlag{Name: "remote", Aliases: []string{"r"}},
+		&cli.BoolFlag{Name: "headfull", Aliases: []string{"H"}},
 		&cli.IntFlag{Name: "concurrency", Aliases: []string{"c"}},
 		&cli.IntFlag{Name: "port", Value: 9222},
 		&cli.StringFlag{Name: "device-type", Value: "desktop", Action: validDeviceType},
@@ -146,6 +147,8 @@ func runTask(ctx context.Context, cmd *cli.Command, name string, params map[stri
 
 	if cmd.Bool("remote") && host != "" && port != 0 {
 		opts = append(opts, engine.WithRemoteAllocator(host, port))
+	} else if cmd.Bool("headfull") {
+		opts = append(opts, engine.WithHeadfullLocalAllocator())
 	}
 
 	e := engine.New(cmd.Int("concurrency"), opts...)

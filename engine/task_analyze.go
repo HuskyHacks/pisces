@@ -4,10 +4,12 @@ import (
 	"context"
 	"embed"
 	"errors"
-	"fmt"
 	"time"
 
+	"github.com/chromedp/cdproto/browser"
 	"github.com/chromedp/cdproto/cdp"
+	"github.com/chromedp/cdproto/page"
+	"github.com/chromedp/cdproto/runtime"
 	"github.com/chromedp/chromedp"
 	"github.com/rs/zerolog"
 )
@@ -16,10 +18,11 @@ import (
 var jsFS embed.FS
 
 type AnalyzeResult struct {
-	Forms       []Form `json:"forms"`
-	Links       []Link `json:"links"`
-	Head        Head   `json:"head"`
-	VisibleText string `json:"visible_text"`
+	ClipboardTexts []string `json:"clipboard_texts"`
+	Forms          []Form   `json:"forms"`
+	Head           Head     `json:"head"`
+	Links          []Link   `json:"links"`
+	VisibleText    string   `json:"visible_text"`
 	*Visit
 }
 
@@ -87,19 +90,16 @@ func performAnalyzeTask(ctx context.Context, task *Task, logger *zerolog.Logger)
 		logger.Warn().Msgf("head analysis error: %v", err)
 	}
 
+	if err = runInteractions(ctx, wait, &result, logger); err != nil {
+		logger.Warn().Msgf("interaction error: %v", err)
+	}
+
 	return result, nil
 }
 
 func extractVisibleText(ctx context.Context, wait int64, result *AnalyzeResult) error {
-	var visibleText string
-
-	js, err := jsFS.ReadFile("js/visible_text.js")
+	visibleText, err := evaluateAsString(ctx, "js/visible_text.js")
 	if err != nil {
-		return err
-	}
-
-	if err = chromedp.Run(ctx, chromedp.Evaluate(string(js), &visibleText)); err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -250,6 +250,143 @@ func runHeadAnalysis(ctx context.Context, wait int64, result *AnalyzeResult) err
 
 		return nil
 	}))
+}
+
+func runInteractions(ctx context.Context, wait int64, result *AnalyzeResult, logger *zerolog.Logger) error {
+	if err := runClipboardInteractions(ctx, wait, result, logger); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func runClipboardInteractions(ctx context.Context, wait int64, result *AnalyzeResult, logger *zerolog.Logger) error {
+	clipboardJS, err := jsFS.ReadFile("js/clipboard.js")
+	if err != nil {
+		return err
+	}
+
+	clearJS, err := jsFS.ReadFile("js/clipboard_clear.js")
+	if err != nil {
+		return err
+	}
+
+	if err := setupNavigationLock(ctx, logger); err != nil {
+		return err
+	}
+
+	// Grant permissions to access the clipboard and reset clipboard content
+	if err := chromedp.Run(
+		ctx,
+		browser.
+			GrantPermissions([]browser.PermissionType{browser.PermissionTypeClipboardReadWrite}).
+			WithOrigin(result.Location),
+		chromedp.Evaluate(string(clearJS), nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams {
+			return p.WithAwaitPromise(true)
+		}),
+	); err != nil {
+		return err
+	}
+
+	// Enumerate all nodes and click them; see if anything was added to the clipboard
+	var allNodes []*cdp.Node
+
+	//var allNodesSelector = "body *:not(script, style, a[href], a[href] *, button *)"
+	// Find all leaf nodes that aren't part of links
+	var allNodesSelector = "body *:not(:has(*)):not(script, style, a[href], a[href] *, option, svg *)"
+
+	if err := chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
+		if err := queryWithDeadline(ctx, wait, func(ctx context.Context) error {
+			return chromedp.Nodes(
+				allNodesSelector,
+				&allNodes,
+				chromedp.ByQueryAll,
+			).Do(ctx)
+		}); err != nil {
+			return err
+		}
+
+		return nil
+	})); err != nil {
+		return err
+	}
+
+	logger.Debug().Msgf("found %d nodes to click for clipboard", len(allNodes))
+
+	cc := NewClipboardCapture()
+	for _, node := range allNodes {
+		var clipboardText string
+
+		if err := queryWithDeadline(ctx, 10, func(ctx context.Context) error {
+			return chromedp.Run(
+				ctx,
+				chromedp.Click(node.FullXPath(), chromedp.BySearch),
+				chromedp.Evaluate(string(clipboardJS), &clipboardText, func(p *runtime.EvaluateParams) *runtime.EvaluateParams {
+					return p.WithAwaitPromise(true)
+				}),
+			)
+		}); err != nil {
+			return err
+		}
+
+		if clipboardText != "" {
+			cc.AddTo(clipboardText)
+		}
+	}
+
+	if _, err := evaluateAsString(ctx, "js/navigation_unlock.js"); err != nil {
+		return err
+	}
+
+	result.ClipboardTexts = cc.Values()
+
+	return nil
+}
+
+func setupNavigationLock(ctx context.Context, logger *zerolog.Logger) error {
+	if _, err := evaluateAsString(ctx, "js/navigation_lock.js"); err != nil {
+		return err
+	}
+
+	// Listen for JavaScript onbeforeunload dialog and cancel navigation
+	chromedp.ListenTarget(ctx, func(ev interface{}) {
+		if ev, ok := ev.(*page.EventJavascriptDialogOpening); ok {
+			l := logger.With().Str("type", string(ev.Type)).Logger()
+			l.Debug().Msgf("dialog opening")
+
+			if ev.Type != page.DialogTypeBeforeunload {
+				l.Warn().Msgf("unexpected dialog blocking evaluation: %s", ev.Message)
+				return
+			}
+
+			go func() {
+				err := chromedp.Run(ctx, page.HandleJavaScriptDialog(false))
+				if err != nil {
+					l.Debug().Msgf("navigation lock dialog error: %v", err)
+				} else {
+					l.Debug().Msg("navigation lock dialog dismissed")
+				}
+			}()
+		}
+	})
+
+	return nil
+}
+
+// Evaluate JS snippets from the jsFS as a string
+func evaluateAsString(ctx context.Context, jsPath string) (string, error) {
+	var result string
+
+	js, err := jsFS.ReadFile(jsPath)
+	if err != nil {
+		return "", err
+	}
+
+	if err = chromedp.Run(ctx, chromedp.Evaluate(string(js), &result)); err != nil {
+		return "", err
+	}
+
+	return result, nil
 }
 
 func queryWithDeadline(ctx context.Context, wait int64, callback func(context.Context) error) error {

@@ -43,18 +43,13 @@ func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	http.ServeFileFS(w, r, testFS, fullPath)
 }
 
-func NewTestContext() context.Context {
-	bCtx, _ := browserTestContext()
-
-	return bCtx
-}
-
-func browserTestContext() (context.Context, context.CancelFunc) {
+func NewTestContext() (context.Context, context.CancelFunc) {
 	ctx := context.TODO()
 	remoteUrl, useRemote := os.LookupEnv("PISCES_CHROMEDP_REMOTE_URL")
 	if useRemote {
 		return browser.StartRemote(ctx, remoteUrl)
 	}
 
-	return browser.StartLocal(ctx)
+	_, useHeadfull := os.LookupEnv("PISCES_HEADFULL")
+	return browser.StartLocal(ctx, useHeadfull)
 }

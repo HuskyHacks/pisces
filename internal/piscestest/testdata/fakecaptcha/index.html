@@ -1,0 +1,50 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Required</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="captcha-container">
+      <div class="captcha-header">
+        <h1>🔒 Verification Required</h1>
+        <p>Please complete the verification below to continue</p>
+      </div>
+
+      <div class="captcha-box">
+        <div class="captcha-instruction">
+          To verify you're human, copy and run this command on your computer:
+        </div>
+
+        <div class="code-snippet" id="codeSnippet">
+          <code>I am human!</code>
+        </div>
+
+        <button class="copy-button" id="copyButton">
+          <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+          <span id="buttonText">Copy to Clipboard</span>
+        </button>
+      </div>
+
+      <div class="verification-steps">
+        <h3>📋 Instructions:</h3>
+        <ol>
+          <li>Click the "Copy to Clipboard" button above</li>
+          <li>Open your terminal or command prompt</li>
+          <li>Paste and run the command</li>
+          <li>Wait for the verification to complete</li>
+        </ol>
+        <a href="help.html">Get help</a>
+        <a href="contact.html">Contact us</a>
+      </div>
+
+      <div class="warning">
+        ⚠️ <strong>Note:</strong> Only run commands from trusted sources. This is a demonstration page.
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

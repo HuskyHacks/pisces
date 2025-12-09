@@ -12,6 +12,7 @@ import (
 type config struct {
 	concurreny int
 	remoteUrl  string
+	headfull   bool
 }
 
 type Engine struct {
@@ -28,6 +29,12 @@ type Option func(*Engine)
 func WithRemoteAllocator(host string, port int) Option {
 	return func(e *Engine) {
 		e.config.remoteUrl = fmt.Sprintf("http://%s:%d/json/version", host, port)
+	}
+}
+
+func WithHeadfullLocalAllocator() Option {
+	return func(e *Engine) {
+		e.config.headfull = true
 	}
 }
 
@@ -61,7 +68,7 @@ func (e *Engine) Start(ctx context.Context) {
 	if e.config.remoteUrl != "" {
 		ctx, e.browserCancel = browser.StartRemote(ctx, e.config.remoteUrl)
 	} else {
-		ctx, e.browserCancel = browser.StartLocal(ctx)
+		ctx, e.browserCancel = browser.StartLocal(ctx, e.config.headfull)
 	}
 
 	for i := 0; i < e.config.concurreny; i++ {
