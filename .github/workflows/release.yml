@@ -56,20 +56,11 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Generate release notes
-        run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0)
-          PREVIOUS_TAG=$(git describe --tags --abbrev=0 ${LATEST_TAG}^)
-
-          echo "Generating release notes from ${PREVIOUS_TAG} to ${LATEST_TAG}"
-
-          RELEASE_NOTES=$(git log ${PREVIOUS_TAG}..${LATEST_TAG} \
-            --pretty=format:"- %s (%h)" \
-            --no-merges \
-            | grep -v "\[no-notes\]" || true)
-
-          echo $RELEASE_NOTES > ${{ github.workspace }}_RELEASE_NOTES.md
+        run: ./scripts/release_notes.sh > ${{ github.workspace }}_RELEASE_NOTES.txt
 
       - name: Release
         uses: softprops/action-gh-release@v1
