@@ -24,6 +24,11 @@ chromedp.run:
 
 .PHONY: release
 
+test-docker:
+	docker build -f Dockerfile.dev -t pisces-dev . && \
+	docker run --rm -it -v "$$PWD":/app -w /app pisces-dev go test -v ./internal/piscestest
+
+
 release:
 	@echo "Creating new release..."
 	@# Get the latest tag, default to v0.0.0 if no tags exist
