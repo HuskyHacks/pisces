@@ -21,7 +21,9 @@ ENV PATH="/headless-shell:${PATH}"
 
 COPY --from=builder /app/pisces /usr/local/bin/pisces
 
+COPY . /app
+
 WORKDIR /app
 
 ENTRYPOINT ["pisces"]
-CMD ["--help"]
+# CMD ["--help"]
